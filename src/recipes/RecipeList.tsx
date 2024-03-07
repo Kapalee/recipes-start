@@ -2,16 +2,17 @@ import { Link, useSearchParams } from "react-router-dom";
 import "./RecipesLayout.css";
 import { useEffect, useState } from "react";
 import { Recipe as APIRecipe, getRecipes } from "../services/apiFacade";
-//import { useAuth } from "../security/_Authprovider";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "../security/AuthProvider.tsx";
 
 export default function RecipeList() {
-  //const [queryString] = useSearchParams();
-  //const initialCategory = queryString.get("category");
-  const initialCategory = null;
+  const [queryString] = useSearchParams();
+  const initialCategory = queryString.get("category");
+  const recipeToEdit = useLocation().state || null;
   const [recipes, setRecipes] = useState<Array<APIRecipe>>([]);
   const [category, setCategory] = useState<string | null>(initialCategory);
   const [error, setError] = useState("");
-  //const auth = useAuth();
+  const auth = useAuth();
 
   useEffect(() => {
     getRecipes(category)
@@ -24,8 +25,11 @@ export default function RecipeList() {
     return (
       <li key={recipe.id}>
         <Link to={`${recipe.id}`}>{recipe.name}</Link>,
-        {/*TODO:Eventually this should only be added for a logged in user*/}
-        {/* <Link className="recipe-btn" to="/add" state={recipe}>Edit </Link> */}
+        {auth.isLoggedIn() && (
+          <Link className="recipe-btn" to="/add" state={recipe}>
+            Edit{" "}
+          </Link>
+        )}
       </li>
     );
   });
